@@ -109,17 +109,16 @@ void Filling_Notepad(int array[380][10], int &index, int entry)
 		{
 			array[entry][identifier] = index;
 			filled = true;
-			break;
 		}
 		if(identifier >= 10)
 		{
 			cout << "All spots filled, cannot record anymore" << endl;
 			filled = true;
-			break;
 		}
 	}
-	
+
 	index++;
+	cout << index;
 }
 
 void populate_array(ifstream &fin, int array[380][10])
@@ -147,8 +146,10 @@ void store_array(ofstream &fout, int array[380][10])
 	}
 }
 
-void SearchEngine(ifstream &fin, int index)
+void SearchEngine(int index)
 {
+	ifstream fin("ID_Password.txt");
+	
 	string siteName;
 	string id;
 	string password;
@@ -158,10 +159,16 @@ void SearchEngine(ifstream &fin, int index)
 	{
 		if(bookmark == index)
 		{
-			cout << "Site: " << siteName << "ID: " << id << "Password: " << password;
+			if(index == 0)
+			{
+				cout << "No Site Found" << endl;
+				break;
+			}
+			cout << "Site: " << siteName << "  ID: " << id << "  Password: " << password << endl; 
 			break;
 		}
 	}
+	fin.close();
 }
 
 int main()
@@ -172,21 +179,18 @@ int main()
 	int second_value = 0;
 	int array[380][10] = {0};
 	int index = 1;
+
 	
 	ifstream finindex("index.txt");
-	ofstream foutindex("index.txt", ofstream::trunc);
+	finindex >> index;
 	
 	ifstream finIDandPassword("ID_Password.txt");
-	ofstream foutIDandPassword("ID_Password.txt", ios::app);
-	
-	ifstream finREADME("readmeID.txt");
+	ofstream foutIDandPassword;
+	foutIDandPassword.open ("ID_Password.txt", ios::app);
 	
 	ifstream finARRAY("array.txt");
-	ofstream foutARRAY("array.txt", ofstream::trunc);
-	
 	populate_array(finARRAY, array);
-	finindex >> index;
-	cout << index;
+
 	do{
 		cout << "Add (A) or Search (S)? ";
 		cin >> Answer1;
@@ -197,6 +201,7 @@ int main()
 			string site = "";
 			string line = "";
 	
+			ifstream finREADME("readmeID.txt");
 			outputREADME(finREADME);
 			
 			cout << "Enter the Site to add: "; 
@@ -207,6 +212,8 @@ int main()
 			IDandPasswordRecord(foutIDandPassword, site, index);
 			
 			Filling_Notepad(array, index, entryNUM.entry_calc());
+			
+			finREADME.close();
 		}
 		else if(Answer1 == "S" && "s")
 		{
@@ -217,11 +224,16 @@ int main()
 			
 			BookKeeping entryNUM(site);
 			int bookmark_index = 0;
-			bookmark_index = entryNUM.entry_calc();
 			
-			for(int identifier = 1; identifier < 10 || array[entryNUM.entry_calc()][identifier] > 0; identifier++)
+			for(int identifier = 0; identifier < 10; identifier++)
 			{
-				SearchEngine(finIDandPassword, entryNUM.entry_calc());
+				bookmark_index = array[entryNUM.entry_calc()][identifier];
+				cout << "#" << bookmark_index << " ";
+				SearchEngine(bookmark_index);
+				if(bookmark_index == 0)
+				{
+					break;
+				}
 			}
 		}
 		else
@@ -232,6 +244,20 @@ int main()
 		cin >> Answer2;
 	}while(Answer2 == "y");
 	
+	
+	ofstream foutARRAY;
+	foutARRAY.open ("array.txt", ios::trunc);
+	
 	store_array(foutARRAY, array);
+	
+	ofstream foutindex;
+	foutindex.open("index.txt", ios::trunc);
+	
 	foutindex << index;
+	cout << index;
+	
+	
+	finindex.close();
+	finIDandPassword.close();
+	finARRAY.close();
 }
