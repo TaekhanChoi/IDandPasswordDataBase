@@ -179,7 +179,6 @@ int main()
 	int second_value = 0;
 	int array[380][10] = {0};
 	int index = 1;
-
 	
 	ifstream finindex("index.txt");
 	finindex >> index;
